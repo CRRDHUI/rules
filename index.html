@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>宝可梦规则速查</title>
+<style>
+  :root {
+    --bg: #0f1420;
+    --card: #182031;
+    --line: #2a3448;
+    --text: #e6ebf5;
+    --muted: #8a96ad;
+    --yes: #2ecc71;
+    --no: #ff5c5c;
+    --unknown: #f0b429;
+    --accent: #4c8dff;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 18px 14px 40px;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    min-height: 100vh;
+  }
+  html, body { overflow-x: hidden; }
+  .wrap { width: 100%; max-width: 620px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: .5px; }
+  .sub { color: var(--muted); font-size: 12.5px; margin-bottom: 18px; }
+  .search { display: block; margin-bottom: 14px; }
+  input {
+    width: 100%; padding: 13px 14px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--card); color: var(--text);
+    font-size: 15px; outline: none;
+  }
+  input:focus { border-color: var(--accent); }
+  button {
+    width: 100%; margin-top: 8px; padding: 12px 18px; border: none; border-radius: 12px;
+    background: var(--accent); color: #fff; font-size: 15px; font-weight: 600;
+    cursor: pointer;
+  }
+  button:active { opacity: .85; }
+  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 18px; }
+  .chip {
+    padding: 7px 10px; border-radius: 999px; font-size: 12px;
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    text-align: center;
+    background: var(--card); border: 1px solid var(--line); color: var(--muted);
+    cursor: pointer;
+  }
+  .chip:active { background: #202a3f; }
+  .card { width: 100%; overflow-wrap: anywhere;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px; margin-bottom: 12px;
+    animation: in .18s ease-out;
+  }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; margin-bottom: 10px;
+  }
+  .yes .badge { background: rgba(46,204,113,.15); color: var(--yes); }
+  .no .badge { background: rgba(255,92,92,.15); color: var(--no); }
+  .unknown .badge { background: rgba(240,180,41,.15); color: var(--unknown); }
+  .title { font-size: 16.5px; font-weight: 700; margin-bottom: 6px; }
+  .body { font-size: 14px; line-height: 1.65; color: #c9d3e6; }
+  .basis { margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .foot { margin-top: 22px; font-size: 12px; color: var(--muted); line-height: 1.7; }
+  .empty { color: var(--muted); font-size: 13.5px; text-align: center; padding: 26px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>宝可梦规则速查</h1>
+  <div class="sub">普通精灵赛 · 禁神兽 · 禁重复 · 禁睡眠</div>
+
+  <div class="search">
+    <input id="q" placeholder="输入宝可梦 / 招式 / 道具，如：波克基斯能不能用" autocomplete="off">
+    <button id="go">查</button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+  <div id="out"><div class="empty">输入问题后按回车</div></div>
+
+  <div class="foot">
+    以群文件《宝可梦比赛规则》为准。查不到请询问裁判，别自己猜。<br>
+    收录 <span id="cnt">0</span> 条宝可梦 + 招式 / 道具 / 特殊机制。
+  </div>
+</div>
+
+<script>
+/* 宝可梦比赛规则问答引擎（可单独运行，也可内嵌网页） */
+(function (global) {
+  "use strict";
+
+  // categories: legend 一级神 / sub 二级神 / myth 幻兽 / ub 究极异兽 / normal 可用
+  const DEX = [];
+  function add(names, cat, aliases) {
+    names.forEach(function (n) {
+      DEX.push({ n: n, c: cat, a: (aliases && aliases[n]) || [] });
+    });
+  }
+
+  add([
+    "超梦", "洛奇亚", "凤王", "盖欧卡", "固拉多", "烈空坐", "帝牙卢卡", "帕路奇亚",
+    "骑拉帝纳", "莱希拉姆", "捷克罗姆", "酋雷姆", "哲尔尼亚斯", "伊裴尔塔尔", "基格尔德",
+    "索尔迦雷欧", "露奈雅拉", "奈克洛兹玛", "苍响", "藏玛然特", "无极汰那", "蕾冠王",
+    "故勒顿", "密勒顿", "太乐巴戈斯", "波荡水", "铁斑叶"
+  ], "legend", {
+    盖欧卡: ["老盖", "海皇牙", "kyogre"],
+    固拉多: ["古拉顿", "groudon"],
+    烈空坐: ["烈空座", "rayquaza"],
+    洛奇亚: ["lugia"],
+    凤王: ["ho-oh", "凤王兽"],
+    奈克洛兹玛: ["骡子马"],
+    无极汰那: ["无极"],
+    基格尔德: ["z神", "基格尔"],
+    苍响: ["剑狗"],
+    藏玛然特: ["盾狗"]
+  });
+
+  add([
+    "急冻鸟", "闪电鸟", "火焰鸟", "雷公", "炎帝", "水君", "雷吉洛克", "雷吉艾斯",
+    "雷吉斯奇鲁", "拉帝亚斯", "拉帝欧斯", "由克希", "艾姆利多", "亚克诺姆", "克雷色利亚",
+    "勾帕路翁", "代拉基翁", "毕力吉翁", "龙卷云", "雷电云", "土地云",
+    "卡璞·鸣鸣", "卡璞·蝶蝶", "卡璞·哞哞", "卡璞·鳍鳍", "雷吉艾勒奇", "雷吉铎拉戈",
+    "熊徒弟", "武道熊师", "眷恋云", "科斯莫古", "科斯莫姆", "毒贝比", "属性：空", "银伴战兽"
+  ], "sub", {
+    卡璞·鸣鸣: ["卡璞鸣鸣", "鸣鸣"],
+    卡璞·蝶蝶: ["卡璞蝶蝶", "蝶蝶"],
+    卡璞·哞哞: ["卡璞哞哞", "哞哞"],
+    卡璞·鳍鳍: ["卡璞鳍鳍", "鳍鳍"],
+    拉帝亚斯: ["拉帝亚斯", "蓝水都"],
+    拉帝欧斯: ["红水都"],
+    武道熊师: ["武道雄狮", "熊师"],
+    雷吉艾勒奇: ["电柱"],
+    雷吉铎拉戈: ["龙柱"]
+  });
+
+  add([
+    "梦幻", "时拉比", "基拉祈", "代欧奇希斯", "玛纳霏", "达克莱伊", "谢米", "阿尔宙斯",
+    "比克提尼", "凯路迪欧", "美洛耶塔", "盖诺赛克特", "蒂安希", "胡帕", "波尔凯尼恩",
+    "玛机雅娜", "玛夏多", "捷拉奥拉", "美录坦", "美录梅塔", "萨戮德", "桃歹郎"
+  ], "myth", {
+    阿尔宙斯: ["创世神", "羊驼"],
+    达克莱伊: ["恶梦神"],
+    玛夏多: ["玛夏朵"],
+    美录梅塔: ["美录梅塔"]
+  });
+
+  add([
+    "虚吾伊德", "爆肌蚊", "费洛美螂", "电束木", "纸御剑", "垒磊石", "砰头小丑",
+    "恶食大王", "铁火辉夜", "四颚针龙"
+  ], "ub", {});
+
+  add([
+    "快龙", "班基拉斯", "暴飞龙", "烈咬陆鲨", "三首恶龙", "黏美龙", "杖尾鳞甲龙",
+    "多龙巴鲁托", "戟脊龙", "巨金怪", "铁哑铃", "金属怪", "波克基斯", "波克基古", "波克比",
+    "轰鸣月", "铁武者", "爬地翅", "铁荆棘", "猛恶菇", "铁包袱", "铁毒蛾", "铁臂膀",
+    "铁脖颈", "铁辙迹", "铁磐岩", "铁头壳", "振翼发", "沙铁皮"
+  ], "normal", {
+    快龙: ["肥大"],
+    班基拉斯: ["班吉拉", "老班"],
+    烈咬陆鲨: ["地龙", "烈咬陆鲨"],
+    巨金怪: ["铁哑铃最终进化"],
+    铁哑铃: ["哑铃"]
+  });
+
+  add([
+    "皮卡丘", "雷丘", "喷火龙", "妙蛙花", "水箭龟", "大针蜂", "比雕", "大嘴雀",
+    "阿柏怪", "穿山王", "尼多王", "尼多后", "九尾", "胖可丁", "大嘴蝠", "霸王花",
+    "末入蛾", "三地鼠", "哥达鸭", "蚊香泳士", "胡地", "怪力", "大食花", "毒刺水母",
+    "隆隆岩", "烈焰马", "呆呆兽", "小磁怪", "嘟嘟利", "白海狮", "臭臭泥", "刺甲贝",
+    "耿鬼", "大岩蛇", "引梦貘人", "巨钳蟹", "椰蛋树", "嘎啦嘎啦", "飞腿郎", "快拳郎",
+    "大舌头", "双弹瓦斯", "钻角犀兽", "吉利蛋", "蔓藤怪", "袋兽", "金鱼王", "海刺龙",
+    "宝石海星", "魔墙人偶", "飞天螳螂", "迷唇姐", "电击兽", "鸭嘴火兽", "凯罗斯",
+    "肯泰罗", "暴鲤龙", "拉普拉斯", "百变怪", "多边兽", "镰刀盔", "化石翼龙", "卡比兽",
+    "大竺葵", "火暴兽", "大力鳄", "电龙", "玛力露丽", "蚊香蛙皇", "太阳伊布", "月亮伊布",
+    "黑鲁加", "沙奈朵", "恰雷姆", "波士可多拉", "巨沼怪", "蜥蜴王", "火焰鸡", "乐天河童",
+    "狡猾天狗", "超力王", "铁掌力士", "雷丘", "大嘴娃", "吞食兽", "帝牙海狮",
+    "姆克鹰", "伦琴猫", "罗丝雷朵", "战槌龙", "护城龙", "路卡利欧", "烈咬陆鲨", "河马兽",
+    "毒骷蛙", "巨蔓藤", "自爆磁怪", "大朝北鼻", "艾路雷朵", "洛托姆", "天蝎王",
+    "炎武王", "大剑鬼", "君主蛇", "龙头地鼠", "双斧战龙", "胖嘟嘟", "败露球菇", "象征鸟",
+    "甲贺忍蛙", "烈箭鹰", "火炎狮", "妖火红狐", "布里卡隆", "毒藻龙", "锹农炮虫",
+    "摔角鹰人", "黏美龙", "音波龙", "甜冷美后", "鬃岩狼人", "焰后蜥", "托戈德玛尔",
+    "谜拟丘", "爆焰龟兽", "老翁龙", "杖尾鳞甲龙", "闪焰王牌", "轰擂金刚猩", "千面避役",
+    "钢铠鸦", "暴噬龟", "巨炭山", "沙螺蟒", "毛辫羊", "苹裹龙", "丰蜜龙", "爱管侍",
+    "布莉姆温", "巨石丁", "铝钢龙", "多龙巴鲁托", "魔灵珊瑚", "喵头目",
+    "狂欢浪舞鸭", "骨纹巨声鳄", "巴布土拨", "巨锻匠", "赛富豪", "苍炎刃鬼", "红莲铠骑",
+    "弃世猴", "浩大鲸", "轻身鳕", "米立龙", "缠红鹤", "盐石巨灵", "墓扬犬", "怖纳噬草"
+  ], "normal", {
+    甲贺忍蛙: ["忍蛙"],
+    喷火龙: ["老喷"],
+    赛富豪: ["赛富豪"]
+  });
+
+  const BANNED_MOVES = {
+    催眠术: "让对手睡眠",
+    催眠粉: "让对手睡眠",
+    睡眠粉: "让对手睡眠",
+    蘑菇孢子: "让对手睡眠",
+    哈欠: "让对手睡眠",
+    唱歌: "让对手睡眠",
+    恶魔之吻: "让对手睡眠",
+    天使之吻: "让对手睡眠",
+    地裂: "一击必杀",
+    断头钳: "一击必杀",
+    独角钻: "一击必杀",
+    绝对零度: "一击必杀",
+    影子分身: "提升闪避",
+    变小: "提升闪避",
+    接棒: "传递能力强化",
+    终焉之歌: "规则禁用"
+  };
+
+  const OK_MOVES = {
+    睡觉: "自我睡眠，允许",
+    冰冻光束: "未限制",
+    电磁波: "未限制",
+    剧毒: "未限制",
+    鬼火: "未限制"
+  };
+
+  const ITEMS = {
+    王者之证: "会造成畏缩连锁，规则禁用",
+    "Z纯晶手环": "Z 招式已禁用",
+    z纯晶手环: "Z 招式已禁用"
+  };
+
+  const MECHANICS = [
+    { k: ["太晶", "太晶化", "terastal"], name: "太晶化", usable: false, reason: "本服已实装太晶化，本次规则禁止使用", basis: "七、特殊机制" },
+    { k: ["极巨", "极巨化", "超极巨", "dynamax"], name: "极巨化 / 超极巨", usable: false, reason: "本服已实装极巨化，本次规则禁止使用", basis: "七、特殊机制" },
+    { k: ["无极巨化", "eternamax"], name: "无极巨化（Eternamax）", usable: false, reason: "剧情 Boss 形态，视为非法形态，禁止使用", basis: "七、特殊机制" },
+    { k: ["z招式", "z 招式", "z纯晶"], name: "Z 招式", usable: false, reason: "本服已实装 Z 招式，本次规则禁止（Z 纯晶手环同时禁用）", basis: "七、特殊机制" },
+    { k: ["原始回归"], name: "原始回归", usable: false, reason: "原始回归只属于盖欧卡/固拉多（一级神），禁用", basis: "七、特殊机制" },
+    { k: ["自定义形态", "宝宝形态", "融合形态", "魔改"], name: "自定义 / 魔改形态", usable: false, reason: "服务器自定义的宝宝形态、融合形态等属于魔改，禁止使用", basis: "四、宝可梦限制 · 4.3" },
+    { k: ["mega", "超级进化", "mega进化"], name: "Mega 进化", usable: true, reason: "本服所有宝可梦均可 Mega 进化（不要求原本有 Mega 形态）；每方每场最多 1 只", basis: "七、特殊机制" }
+  ];
+
+  const CAT_INFO = {
+    legend: { label: "一级神", usable: false, reason: "属于一级神（官方分级 Uber / 封面神），本赛只允许普通宝可梦" },
+    sub: { label: "二级神", usable: false, reason: "属于二级神（传说的宝可梦），本赛只允许普通宝可梦" },
+    myth: { label: "幻兽", usable: false, reason: "属于幻兽（官方分类 Mythical），本赛只允许普通宝可梦" },
+    ub: { label: "究极异兽", usable: false, reason: "属于究极异兽（Ultra Beast），本赛只允许普通宝可梦" },
+    normal: { label: "普通宝可梦", usable: true, reason: "属于普通宝可梦，不受神兽限制" }
+  };
+
+  const PREFIX = ["mega", "超级", "原始", "究极", "极巨", "超极巨", "阿罗拉", "伽勒尔", "洗翠", "帕底亚", "合众", "关都", "丰缘", "神奥"];
+  const SUFFIX = ["-x", "-y", "x", "y", "形态", "的样子", "原始回归", "超级进化", "超极巨化", "究极形态", "无极巨化", "10%", "50%", "完全体"];
+
+  function norm(s) {
+    return s.replace(/\s+/g, "").replace(/[，。！？、,.!?]/g, "").toLowerCase();
+  }
+
+  function stripForm(name) {
+    let s = norm(name);
+    let form = "";
+    PREFIX.forEach(function (p) {
+      if (s.startsWith(p) && s.length > p.length + 1) {
+        form = p + form;
+        s = s.slice(p.length);
+      }
+    });
+    SUFFIX.forEach(function (x) {
+      if (s.endsWith(x) && s.length > x.length + 1) {
+        form = form + "·" + x;
+        s = s.slice(0, s.length - x.length);
+      }
+    });
+    return { base: s, form: form };
+  }
+
+  function lev(a, b) {
+    const m = a.length, n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    let prev = new Array(n + 1), cur = new Array(n + 1);
+    for (let j = 0; j <= n; j++) prev[j] = j;
+    for (let i = 1; i <= m; i++) {
+      cur[0] = i;
+      for (let j = 1; j <= n; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+      }
+      const t = prev; prev = cur; cur = t;
+    }
+    return prev[n];
+  }
+
+  function findMon(name) {
+    const s = norm(name);
+    if (!s) return null;
+    // 1) 正名/别名精确
+    for (const d of DEX) {
+      if (norm(d.n) === s) return d;
+      for (const a of d.a) if (norm(a) === s) return d;
+    }
+    // 2) 包含关系（输入里含名字，或名字含输入）
+    let best = null, bestLen = 0;
+    for (const d of DEX) {
+      const n = norm(d.n);
+      if (s.includes(n) && n.length > bestLen) { best = d; bestLen = n.length; }
+      for (const a of d.a) {
+        const an = norm(a);
+        if (s.includes(an) && an.length > bestLen) { best = d; bestLen = an.length; }
+      }
+    }
+    if (best) return best;
+    // 3) 编辑距离
+    let bd = null, bdist = 99;
+    for (const d of DEX) {
+      const n = norm(d.n);
+      if (Math.abs(n.length - s.length) > 2) continue;
+      const dist = lev(s, n);
+      if (dist < bdist) { bdist = dist; bd = d; }
+    }
+    if (bd && bdist <= Math.max(1, Math.floor(s.length / 4))) return bd;
+    return null;
+  }
+
+  function answer(q) {
+    const raw = String(q || "").trim();
+    if (!raw) return { status: "unknown", title: "请输入问题", body: "例如：波克基斯能不能用 / 催眠术能用吗 / 王者之证能用吗" };
+    const s = norm(raw);
+
+    // 机制
+    if (/无极巨化|eternamax/i.test(raw)) {
+      return { status: "no", title: "无极巨化（Eternamax）：禁止", body: "这是剧情 Boss 形态，视为非法形态。", basis: "七、特殊机制" };
+    }
+    for (const m of MECHANICS) {
+      if (m.k.some(function (k) { return s.includes(norm(k)); })) {
+        if (m.usable && m.name.indexOf("Mega") === 0) {
+          const cleaned2 = raw.replace(/mega|超级进化|mega进化/gi, "");
+          const mb = findMon(stripForm(cleaned2).base);
+          if (mb) {
+            const mi = CAT_INFO[mb.c];
+            return {
+              status: mi.usable ? "yes" : "no",
+              title: mb.n + (mi.usable ? "：可以使用" : "：不能使用"),
+              body: mi.reason + "。本服所有宝可梦均可 Mega；每方每场最多 1 只。",
+              basis: "四、宝可梦限制 / 七、特殊机制"
+            };
+          }
+        }
+        return {
+          status: m.usable ? "yes" : "no",
+          title: m.name + "：" + (m.usable ? "允许" : "禁止"),
+          body: m.reason,
+          basis: m.basis
+        };
+      }
+    }
+
+    // 招式
+    for (const mv in BANNED_MOVES) {
+      if (s.includes(norm(mv))) {
+        return {
+          status: "no",
+          title: mv + "：禁止使用",
+          body: "该招式属于「" + BANNED_MOVES[mv] + "」，本赛禁用。",
+          basis: "五、招式与状态限制"
+        };
+      }
+    }
+    for (const mv in OK_MOVES) {
+      if (s.includes(norm(mv))) {
+        return {
+          status: "yes",
+          title: mv + "：可以使用",
+          body: OK_MOVES[mv] + "。",
+          basis: "五、招式与状态限制"
+        };
+      }
+    }
+
+    // 道具
+    for (const it in ITEMS) {
+      if (s.includes(norm(it))) {
+        return {
+          status: "no",
+          title: it + "：禁用",
+          body: ITEMS[it] + "。",
+          basis: "六、道具限制"
+        };
+      }
+    }
+
+    // 宝可梦
+    const cleaned = s
+      .replace(/(能不能|可不可以|可以不|可以|能用|可用|能带|可以带|带回|使用|用|吗|呢|能|行不行|行|么|啊|呀|请问|问一下|这个|这只|精灵|宝可梦)/g, "")
+      .replace(/[?？!！。]/g, "");
+    const parts = stripForm(cleaned);
+    let mon = findMon(parts.base) || findMon(cleaned);
+    if (!mon) return {
+      status: "unknown",
+      title: "没有查到这只宝可梦",
+      body: "可能是新宝可梦、叫法不同，或规则表未收录。请把名字发给裁判确认。",
+      basis: "速查卡 · 拿不准就问裁判"
+    };
+
+    const info = CAT_INFO[mon.c];
+    const extra = parts.form ? "（你问的是「" + parts.form.replace(/^·/, "") + "」形态）" : "";
+    if (!info.usable) {
+      return {
+        status: "no",
+        title: mon.n + "：不能使用",
+        body: info.reason + "。" + extra,
+        basis: "四、宝可梦限制"
+      };
+    }
+    return {
+      status: "yes",
+      title: mon.n + "：可以使用",
+      body: info.reason + "。" + extra,
+      basis: "四、宝可梦限制"
+    };
+  }
+
+  global.PokeRulesEngine = { answer: answer, DEX: DEX };
+
+  if (typeof module !== "undefined" && module.exports) module.exports = global.PokeRulesEngine;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+</script>
+<script>
+  const engine = window.PokeRulesEngine;
+  const out = document.getElementById("out");
+  const input = document.getElementById("q");
+
+  document.getElementById("cnt").textContent = engine.DEX.length;
+
+  const samples = ["波克基斯能不能用", "老盖能不能用", "原始固拉多能用吗", "Mega 巨金怪能用吗",
+                   "催眠术能用吗", "睡觉能用吗", "王者之证能用吗", "太晶化能用吗", "轰鸣月能不能用"];
+  const chips = document.getElementById("chips");
+  samples.forEach(function (s) {
+    const b = document.createElement("div");
+    b.className = "chip";
+    b.textContent = s;
+    b.onclick = function () { input.value = s; run(); };
+    chips.appendChild(b);
+  });
+
+  function render(r) {
+    const cls = r.status === "yes" ? "yes" : r.status === "no" ? "no" : "unknown";
+    const label = r.status === "yes" ? "可以用" : r.status === "no" ? "不能用" : "不确定";
+    out.innerHTML =
+      '<div class="card ' + cls + '">' +
+        '<div class="badge">' + label + '</div>' +
+        '<div class="title">' + r.title + '</div>' +
+        '<div class="body">' + r.body + '</div>' +
+        (r.basis ? '<div class="basis">依据：' + r.basis + '</div>' : '') +
+      '</div>';
+  }
+
+  function run() {
+    const q = input.value.trim();
+    if (!q) return;
+    render(engine.answer(q));
+  }
+
+  document.getElementById("go").onclick = run;
+  input.addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
+  input.focus();
+  if (location.hash) {
+    try { input.value = decodeURIComponent(location.hash.slice(1)); run(); } catch (e) {}
+  }
+</script>
+</body>
+</html>
