@@ -234,7 +234,7 @@
     { k: ["z招式", "z 招式", "z纯晶"], name: "Z 招式", usable: false, reason: "本服已实装 Z 招式，本次规则禁止（Z 纯晶手环同时禁用）", basis: "七、特殊机制" },
     { k: ["原始回归"], name: "原始回归", usable: false, reason: "原始回归只属于盖欧卡/固拉多（一级神），禁用", basis: "七、特殊机制" },
     { k: ["自定义形态", "宝宝形态", "融合形态", "魔改"], name: "自定义 / 魔改形态", usable: false, reason: "服务器自定义的宝宝形态、融合形态等属于魔改，禁止使用", basis: "四、宝可梦限制 · 4.3" },
-    { k: ["mega", "超级进化", "mega进化"], name: "Mega 进化", usable: true, reason: "本服所有宝可梦均可 Mega 进化（不要求原本有 Mega 形态）；每方每场最多 1 只", basis: "七、特殊机制" }
+    { k: ["mega", "超级进化", "mega进化"], name: "Mega 进化", usable: true, reason: "本服所有宝可梦均可 Mega 进化，不要求原本有 Mega 形态，Mega 数量不限", basis: "七、特殊机制" }
   ];
 
   const CAT_INFO = {
@@ -337,7 +337,7 @@
             return {
               status: mi.usable ? "yes" : "no",
               title: mb.n + (mi.usable ? "：可以使用" : "：不能使用"),
-              body: mi.reason + "。本服所有宝可梦均可 Mega；每方每场最多 1 只。",
+              body: mi.reason + "。本服所有宝可梦均可 Mega，Mega 数量不限。",
               basis: "四、宝可梦限制 / 七、特殊机制"
             };
           }
