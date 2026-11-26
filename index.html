@@ -82,6 +82,26 @@
     transform: scale(0); animation: ripple .6s ease-out forwards;
   }
 
+  .chips-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 2px 2px 8px;
+    animation: fadeUp .5s var(--ease) .14s both;
+  }
+  .chips-head span { font-size: 12px; color: var(--muted); letter-spacing: .3px; }
+  .refresh {
+    display: inline-flex; align-items: center; gap: 5px;
+    width: auto; margin: 0; padding: 5px 10px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0;
+    color: var(--muted); background: transparent;
+    border: 1px solid var(--line); border-radius: 999px;
+    box-shadow: none; cursor: pointer;
+    transition: color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .refresh:hover { color: var(--accent2); border-color: rgba(91,141,239,.6); background: rgba(91,141,239,.08); filter: none; }
+  .refresh:active { transform: scale(.96); }
+  .refresh.spin svg { animation: spin .5s var(--ease); }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
   .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
   .chip {
     padding: 9px 10px; border-radius: 999px; font-size: 12.5px; text-align: center;
@@ -161,6 +181,14 @@
     <button id="go">查 询</button>
   </div>
 
+  <div class="chips-head">
+    <span>试试这些</span>
+    <button class="refresh" id="reshuffle" type="button">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+           stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      换一批
+    </button>
+  </div>
   <div class="chips" id="chips"></div>
   <div id="out"><div class="empty">输入问题后按回车</div></div>
 
@@ -413,16 +441,48 @@
   const btn = document.getElementById("go");
   document.getElementById("cnt").textContent = engine.DEX.length;
 
-  const samples = ["波克基斯能不能用", "老盖能不能用", "原始固拉多能用吗", "Mega 巨金怪能用吗",
-                   "催眠术能用吗", "睡觉能用吗", "王者之证能用吗", "太晶化能用吗", "轰鸣月能不能用"];
+  const POOL = [
+    "波克基斯能不能用", "老盖能不能用", "原始固拉多能用吗", "Mega 巨金怪能用吗",
+    "催眠术能用吗", "睡觉能用吗", "王者之证能用吗", "太晶化能用吗", "轰鸣月能不能用",
+    "叉字蝠能不能用", "赛富豪能不能用", "巨锻匠能不能用", "肥大能不能用", "哑铃能不能用",
+    "剑狗能用吗", "玛夏多能用吗", "虚吾伊德能用吗", "铁斑叶能用吗", "波荡水能用吗",
+    "接棒能用吗", "极巨化能用吗", "Z 招式能用吗", "影子分身能用吗", "一击必杀能用吗",
+    "同种道具能带两个吗", "快龙能不能用", "班基拉斯能不能用", "多龙巴鲁托能不能用",
+    "卡璞・鸣鸣能用吗", "蕾冠王能用吗", "苍响能用吗", "巨金怪能不能用", "忍蛙能不能用"
+  ];
   const chips = document.getElementById("chips");
-  samples.forEach(function (s, i) {
-    const b = document.createElement("div");
-    b.className = "chip";
-    b.textContent = s;
-    b.style.animationDelay = (0.12 + i * 0.035) + "s";
-    b.onclick = function () { input.value = s; run(); };
-    chips.appendChild(b);
+
+  function pick(n) {
+    const pool = POOL.slice();
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, n);
+  }
+
+  function renderChips(animate) {
+    chips.innerHTML = "";
+    pick(8).forEach(function (s, i) {
+      const b = document.createElement("div");
+      b.className = "chip";
+      b.textContent = s;
+      b.style.animation = "none";
+      b.onclick = function () { input.value = s; run(); };
+      chips.appendChild(b);
+      void b.offsetWidth;  // 触发重排，让动画能重放
+      b.style.animation = "chipIn .45s var(--ease) " + (0.03 + i * 0.035) + "s both";
+    });
+  }
+
+  renderChips(false);
+
+  document.getElementById("reshuffle").addEventListener("click", function () {
+    this.classList.remove("spin");
+    void this.offsetWidth;
+    this.classList.add("spin");
+    renderChips(true);
+    setTimeout(() => this.classList.remove("spin"), 520);
   });
 
   function render(r) {
