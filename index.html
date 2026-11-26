@@ -2,71 +2,151 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1420">
 <title>宝可梦规则速查</title>
 <style>
   :root {
-    --bg: #0f1420;
+    --bg: #0e1320;
+    --bg2: #131a2b;
     --card: #182031;
+    --card2: #1c2539;
     --line: #2a3448;
-    --text: #e6ebf5;
-    --muted: #8a96ad;
-    --yes: #2ecc71;
-    --no: #ff5c5c;
-    --unknown: #f0b429;
-    --accent: #4c8dff;
+    --text: #e8edf7;
+    --muted: #8b97ae;
+    --yes: #34d399;
+    --no: #fb7185;
+    --unknown: #fbbf24;
+    --accent: #5b8def;
+    --accent2: #7aa5ff;
+    --ease: cubic-bezier(.22, .61, .36, 1);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { overflow-x: hidden; }
   body {
-    margin: 0; padding: 18px 14px 40px;
-    background: var(--bg); color: var(--text);
+    margin: 0;
+    padding: 20px 16px calc(40px + env(safe-area-inset-bottom));
+    background:
+      radial-gradient(900px 500px at 15% -10%, rgba(91,141,239,.16), transparent 60%),
+      radial-gradient(700px 420px at 100% 0%, rgba(122,165,255,.10), transparent 55%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    background-attachment: fixed;
+    color: var(--text);
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
-  html, body { overflow-x: hidden; }
   .wrap { width: 100%; max-width: 620px; margin: 0 auto; }
-  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: .5px; }
-  .sub { color: var(--muted); font-size: 12.5px; margin-bottom: 18px; }
-  .search { display: block; margin-bottom: 14px; }
+
+  h1 {
+    font-size: 21px; margin: 0 0 6px; letter-spacing: .4px;
+    animation: fadeUp .5s var(--ease) both;
+  }
+  .sub {
+    color: var(--muted); font-size: 12.5px; margin-bottom: 20px;
+    animation: fadeUp .5s var(--ease) .06s both;
+  }
+
+  .search { display: block; margin-bottom: 14px; animation: fadeUp .5s var(--ease) .1s both; }
+  .input-shell {
+    position: relative; border-radius: 14px;
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--line);
+    transition: border-color .25s var(--ease), box-shadow .25s var(--ease), transform .25s var(--ease);
+  }
+  .input-shell:focus-within {
+    border-color: rgba(91,141,239,.85);
+    box-shadow: 0 0 0 4px rgba(91,141,239,.14), 0 10px 30px -12px rgba(91,141,239,.5);
+    transform: translateY(-1px);
+  }
   input {
-    width: 100%; padding: 13px 14px; border-radius: 12px;
-    border: 1px solid var(--line); background: var(--card); color: var(--text);
-    font-size: 15px; outline: none;
+    width: 100%; padding: 15px 16px; border: none; border-radius: 14px;
+    background: transparent; color: var(--text); font-size: 15.5px; outline: none;
   }
-  input:focus { border-color: var(--accent); }
+  input::placeholder { color: #66718a; }
+
   button {
-    width: 100%; margin-top: 8px; padding: 12px 18px; border: none; border-radius: 12px;
-    background: var(--accent); color: #fff; font-size: 15px; font-weight: 600;
-    cursor: pointer;
+    position: relative; overflow: hidden;
+    width: 100%; margin-top: 10px; padding: 14px 18px;
+    border: none; border-radius: 14px; cursor: pointer;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; font-size: 15.5px; font-weight: 700; letter-spacing: .5px;
+    box-shadow: 0 10px 24px -10px rgba(91,141,239,.9);
+    transition: transform .16s var(--ease), box-shadow .2s var(--ease), filter .2s var(--ease);
   }
-  button:active { opacity: .85; }
-  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 18px; }
+  button:hover { filter: brightness(1.05); box-shadow: 0 14px 30px -12px rgba(91,141,239,1); }
+  button:active { transform: scale(.985); }
+  .ripple {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    background: rgba(255,255,255,.45);
+    transform: scale(0); animation: ripple .6s ease-out forwards;
+  }
+
+  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
   .chip {
-    padding: 7px 10px; border-radius: 999px; font-size: 12px;
-    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    text-align: center;
+    padding: 9px 10px; border-radius: 999px; font-size: 12.5px; text-align: center;
     background: var(--card); border: 1px solid var(--line); color: var(--muted);
-    cursor: pointer;
+    cursor: pointer; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    opacity: 0; transform: translateY(6px);
+    animation: chipIn .45s var(--ease) forwards;
+    transition: transform .18s var(--ease), border-color .18s var(--ease), color .18s var(--ease), background .18s var(--ease);
   }
-  .chip:active { background: #202a3f; }
-  .card { width: 100%; overflow-wrap: anywhere;
-    background: var(--card); border: 1px solid var(--line);
-    border-radius: 14px; padding: 16px; margin-bottom: 12px;
-    animation: in .18s ease-out;
+  .chip:hover, .chip:active {
+    transform: translateY(-2px); color: #cfd9ee;
+    border-color: rgba(91,141,239,.55); background: #1b2438;
   }
-  @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    position: relative; width: 100%; overflow-wrap: anywhere;
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--line); border-radius: 16px; padding: 18px;
+    margin-bottom: 12px;
+    transform-origin: top center;
+    animation: cardIn .34s var(--ease) both;
+  }
+  .card::before {
+    content: ""; position: absolute; left: 0; top: 16px; bottom: 16px;
+    width: 3px; border-radius: 3px; background: var(--accent); opacity: .8;
+  }
+  .card.yes::before { background: var(--yes); }
+  .card.no::before { background: var(--no); }
+  .card.unknown::before { background: var(--unknown); }
+
   .badge {
-    display: inline-block; padding: 3px 10px; border-radius: 999px;
-    font-size: 12px; font-weight: 700; margin-bottom: 10px;
+    display: inline-block; padding: 4px 11px; border-radius: 999px;
+    font-size: 12px; font-weight: 800; margin-bottom: 12px;
+    animation: pop .3s var(--ease) .08s both;
   }
-  .yes .badge { background: rgba(46,204,113,.15); color: var(--yes); }
-  .no .badge { background: rgba(255,92,92,.15); color: var(--no); }
-  .unknown .badge { background: rgba(240,180,41,.15); color: var(--unknown); }
-  .title { font-size: 16.5px; font-weight: 700; margin-bottom: 6px; }
-  .body { font-size: 14px; line-height: 1.65; color: #c9d3e6; }
-  .basis { margin-top: 10px; font-size: 12px; color: var(--muted); }
-  .foot { margin-top: 22px; font-size: 12px; color: var(--muted); line-height: 1.7; }
-  .empty { color: var(--muted); font-size: 13.5px; text-align: center; padding: 26px 0; }
+  .yes .badge { background: rgba(52,211,153,.16); color: var(--yes); }
+  .no .badge { background: rgba(251,113,133,.16); color: var(--no); }
+  .unknown .badge { background: rgba(251,191,36,.16); color: var(--unknown); }
+  .title { font-size: 17px; font-weight: 700; margin-bottom: 7px; }
+  .body { font-size: 14px; line-height: 1.7; color: #c8d3e7; }
+  .basis { margin-top: 12px; font-size: 12px; color: var(--muted); }
+
+  .loading .sk {
+    height: 12px; border-radius: 6px; margin-bottom: 10px;
+    background: linear-gradient(90deg, #222c42 25%, #2c3852 37%, #222c42 63%);
+    background-size: 400% 100%; animation: shimmer 1.2s ease-in-out infinite;
+  }
+  .loading .sk.s1 { width: 30%; }
+  .loading .sk.s2 { width: 70%; }
+  .loading .sk.s3 { width: 55%; }
+
+  .empty { color: var(--muted); font-size: 13.5px; text-align: center; padding: 30px 0; }
+  .foot { margin-top: 24px; font-size: 12px; color: var(--muted); line-height: 1.8; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes chipIn { to { opacity: 1; transform: none; } }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: none; } }
+  @keyframes pop { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: scale(1); } }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+  @keyframes ripple { to { transform: scale(2.6); opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -75,8 +155,10 @@
   <div class="sub">普通精灵赛 · 禁神兽 · 禁重复 · 禁睡眠</div>
 
   <div class="search">
-    <input id="q" placeholder="输入宝可梦 / 招式 / 道具，如：波克基斯能不能用" autocomplete="off">
-    <button id="go">查</button>
+    <div class="input-shell">
+      <input id="q" placeholder="输入宝可梦 / 招式 / 道具，如：波克基斯能不能用" autocomplete="off" enterkeyhint="search">
+    </div>
+    <button id="go">查 询</button>
   </div>
 
   <div class="chips" id="chips"></div>
@@ -328,16 +410,17 @@
   const engine = window.PokeRulesEngine;
   const out = document.getElementById("out");
   const input = document.getElementById("q");
-
+  const btn = document.getElementById("go");
   document.getElementById("cnt").textContent = engine.DEX.length;
 
   const samples = ["波克基斯能不能用", "老盖能不能用", "原始固拉多能用吗", "Mega 巨金怪能用吗",
                    "催眠术能用吗", "睡觉能用吗", "王者之证能用吗", "太晶化能用吗", "轰鸣月能不能用"];
   const chips = document.getElementById("chips");
-  samples.forEach(function (s) {
+  samples.forEach(function (s, i) {
     const b = document.createElement("div");
     b.className = "chip";
     b.textContent = s;
+    b.style.animationDelay = (0.12 + i * 0.035) + "s";
     b.onclick = function () { input.value = s; run(); };
     chips.appendChild(b);
   });
@@ -352,20 +435,49 @@
         '<div class="body">' + r.body + '</div>' +
         (r.basis ? '<div class="basis">依据：' + r.basis + '</div>' : '') +
       '</div>';
+    const card = out.firstElementChild;
+    card.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
+  function showLoading() {
+    out.innerHTML =
+      '<div class="card loading">' +
+        '<div class="sk s1"></div><div class="sk s2"></div><div class="sk s3"></div>' +
+      '</div>';
+  }
+
+  let timer = null;
   function run() {
     const q = input.value.trim();
-    if (!q) return;
-    render(engine.answer(q));
+    if (!q) { input.focus(); return; }
+    showLoading();
+    clearTimeout(timer);
+    timer = setTimeout(function () { render(engine.answer(q)); }, 200);
   }
 
-  document.getElementById("go").onclick = run;
-  input.addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
-  input.focus();
-  if (location.hash) {
-    try { input.value = decodeURIComponent(location.hash.slice(1)); run(); } catch (e) {}
-  }
+  btn.addEventListener("click", function (e) {
+    const rect = btn.getBoundingClientRect();
+    const span = document.createElement("span");
+    const size = Math.max(rect.width, rect.height) * 1.2;
+    span.className = "ripple";
+    span.style.width = span.style.height = size + "px";
+    span.style.left = (e.clientX - rect.left - size / 2) + "px";
+    span.style.top = (e.clientY - rect.top - size / 2) + "px";
+    btn.appendChild(span);
+    setTimeout(function () { span.remove(); }, 620);
+    run();
+  });
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); run(); }
+  });
+
+  window.addEventListener("load", function () {
+    input.focus({ preventScroll: true });
+    if (location.hash) {
+      try { input.value = decodeURIComponent(location.hash.slice(1)); run(); } catch (err) {}
+    }
+  });
 </script>
 </body>
 </html>
